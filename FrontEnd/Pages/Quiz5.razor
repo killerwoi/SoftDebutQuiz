@@ -1,0 +1,125 @@
+﻿@page "/quiz5"
+@using Blazing.Mvvm.Components
+@using FrontEnd.Component
+@using FrontEnd.Model.Response
+@using FrontEnd.ViewModel
+
+@inherits MvvmComponentBase<SoftDebuteQuizViewModel>
+@attribute [StreamRendering(true)]
+
+<PageTitle>Quiz5</PageTitle>
+
+<SfToast ID="toast_default" @ref="ViewModel.ToastObj" Title="SoftDebut Quiz" Content="@ViewModel.ErrorMessage" Timeout="5000">
+    <ToastPosition X="Center"></ToastPosition>
+</SfToast>
+
+<div class="container">
+    <div class='form-group'>
+        <SfGrid ID="Grid" @ref="ViewModel.DefaultGrid" DataSource="@ViewModel!.EmployeeData" AllowPaging="true" AllowExcelExport="false" AdaptiveUIMode="AdaptiveMode.Both" Height="550px" Toolbar=@ViewModel.GridToolbarItems TValue="EmployeeGetResponseModel">
+            <GridEvents OnToolbarClick="@ViewModel!.ToolbarClickHandler" CommandClicked="ViewModel.OnGridCommandClicked" RowUpdating="ViewModel.RowUpdating" RowDeleting="ViewModel.RowDeleting" TValue="EmployeeGetResponseModel"></GridEvents>
+            <GridPageSettings PageSize="30"></GridPageSettings>
+            <GridEditSettings ShowDeleteConfirmDialog="true" AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog" Dialog="ViewModel._dialogSettings">
+                <HeaderTemplate>
+                    <span>บันทึกข้อมูล</span>
+                </HeaderTemplate>
+                <Template>
+                    @{
+                        var item = (context as EmployeeGetResponseModel);
+
+                        <div class="d-flex flex-row flex-grow-1 gap-4 pt-3">
+                            <SfTextBox FloatLabelType="FloatLabelType.Always" Placeholder="รหัสพนักงาน" @bind-Value="item!.EmpNum" Readonly="!ViewModel.IsAddMode"></SfTextBox>
+                            <SfTextBox FloatLabelType="FloatLabelType.Always" Placeholder="ชื่อพนักงาน" @bind-Value="item!.EmpName"></SfTextBox>
+                        </div>
+                        <div class="d-flex flex-row flex-grow-1 gap-4 pt-3">
+                            <SfDatePicker Format="dd/MM/yyyy" FloatLabelType="FloatLabelType.Always" Placeholder="วันที่เริ่มงาน" @bind-Value="item!.HireDate"></SfDatePicker>
+                            <SfNumericTextBox TValue="decimal" @bind-Value="item!.Salary" FloatLabelType="FloatLabelType.Always" Placeholder="เงินเดือน" Min="0" Max="1000000" />
+                        </div>
+                        <div class="d-flex flex-row flex-grow-1 gap-4 pt-3">
+                            <SfComboBox TValue="string" FloatLabelType="FloatLabelType.Always" Placeholder="ตำแหน่ง" TItem="PositionResponseModel" @bind-Value="item!.PositionNo" DataSource="ViewModel!.JobPositionData">
+                                <ComboBoxFieldSettings Text="PositionName" Value="PositionNo"></ComboBoxFieldSettings>
+                            </SfComboBox>
+                        </div>
+                        <div class="d-flex flex-row flex-grow-1 gap-4 pt-3">
+                            <SfComboBox TValue="string" FloatLabelType="FloatLabelType.Always" Placeholder="รหัสหัวหน้าแผนก" TItem="EmployeeGetResponseModel" @bind-Value="item!.HeadNo" DataSource="ViewModel!.EmployeeData">
+                                <ComboBoxFieldSettings Text="EmpName" Value="EmpNum"></ComboBoxFieldSettings>
+                            </SfComboBox>
+                            <SfComboBox TValue="string" FloatLabelType="FloatLabelType.Always" Placeholder="รหัสแผนก" TItem="DepartmentGetResponseModel" @bind-Value="item!.DepNo" DataSource="ViewModel!.DepartmentData">
+                                <ComboBoxFieldSettings Text="DepName" Value="DepNo"></ComboBoxFieldSettings>
+                            </SfComboBox>
+                        </div>
+                    }
+                </Template>
+                <FooterTemplate>
+                    <SfButton IsPrimary = "true" OnClick="@ViewModel.EditData">บันทึก</SfButton>
+                    <SfButton OnClick="@ViewModel.CancelEdit">ยกเลิก</SfButton>
+                </FooterTemplate>
+            </GridEditSettings>
+            <GridColumns>
+                <GridColumn HeaderText="" AutoFit="true" TextAlign="TextAlign.Center">
+                    <GridCommandColumns>
+                        <GridCommandColumn ButtonOption="@(new CommandButtonOptions { Content = "แก้ไข", IconCss = "e-icons e-edit" , CssClass = "e-info" })" Type="CommandButtonType.Edit"></GridCommandColumn>
+                        <GridCommandColumn ButtonOption="@(new CommandButtonOptions { Content = "ลบรายการ", IconCss = "e-icons e-delete-row" , CssClass = "e-danger" })" Type="CommandButtonType.Delete"></GridCommandColumn>
+                    </GridCommandColumns>
+                </GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.EmpNum) HeaderText="รหัสพนักงาน" IsPrimaryKey="true" Type="ColumnType.String" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.EmpName) HeaderText="ชื่อพนักงาน" Type="ColumnType.String" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.HireDate) HeaderText="วันที่เริ่มงาน" Type="ColumnType.DateOnly" Format="dd/MM/yyyy" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.Salary) HeaderText="เงินเดือน" Type="ColumnType.Double" Format="N2" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.PositionNo) HeaderText="ตำแหน่ง" Type="ColumnType.String" TextAlign="TextAlign.Center" AutoFit="true">
+                    <Template>
+                        @{
+                            string text = "";
+                            var item = (context as EmployeeGetResponseModel);
+                            if (item?.PositionNo != null)
+                            {
+                                if (ViewModel!.PositionDataLookUp.ContainsKey(item.PositionNo!))
+                                    text = ViewModel!.PositionDataLookUp[item.PositionNo!].PositionName ?? "";
+                            }
+                            <span>@text</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.DepNo) HeaderText="รหัสแผนก" Type="ColumnType.String" TextAlign="TextAlign.Center" AutoFit="true">
+                    <Template>
+                        @{
+                            string text = "";
+                            var item = (context as EmployeeGetResponseModel);
+                            if (item?.DepNo != null)
+                            {
+                                if (ViewModel!.DepartmentDataLookUp.ContainsKey(item.DepNo!))
+                                    text = ViewModel!.DepartmentDataLookUp[item.DepNo!].DepName ?? "";
+                            }
+                            <span>@text</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.HeadNo) HeaderText="รหัสหัวหน้าพนักงาน" Type="ColumnType.String" TextAlign="TextAlign.Center" AutoFit="true">
+                    <Template>
+                        @{
+                            string text = "";
+                            var item = (context as EmployeeGetResponseModel);
+                            var a = ViewModel!.EmployeeData;
+                            if (!string.IsNullOrEmpty(item!.EmpNum) && !string.IsNullOrWhiteSpace(item!.EmpNum))
+                            {
+                                var i = a.FirstOrDefault(o => o.EmpNum == item!.HeadNo);
+                                text = i == null ? "" : i.EmpName ?? "";
+                            }
+                            <span>@text</span>
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+@code
+{
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel!.GetDepartmentData();
+        await ViewModel!.GetJobPositionData();
+        await ViewModel!.InitLookupData();
+        await ViewModel!.GetEmployeeData();
+    }
+}

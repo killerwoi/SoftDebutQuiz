@@ -1,0 +1,48 @@
+﻿@page "/"
+@using Blazing.Mvvm.Components
+@using FrontEnd.Component
+@using FrontEnd.Model.Response
+@using FrontEnd.ViewModel
+
+@inherits MvvmComponentBase<SoftDebuteQuizViewModel>
+@attribute [StreamRendering(true)]
+
+<PageTitle>Quiz4</PageTitle>
+
+<div class="container">
+    <div class='form-group'>
+        <SfTextBox Placeholder="ชื่อพนักงานคนแรก" FloatLabelType="FloatLabelType.Always" Readonly="true" Width="150px" Value="@FirstNameRecord"></SfTextBox>
+    </div>
+    <div class='form-group'>
+        <SfGrid ID="Grid" DataSource="@ViewModel!.EmployeeData" AllowPaging="true" AllowExcelExport="false" AdaptiveUIMode="AdaptiveMode.Both" Height="550px" TValue="EmployeeGetResponseModel">
+            <GridPageSettings PageSize="30"></GridPageSettings>
+            <HeadContent>
+                <span>ข้อมูลพนักงานทั้งหมด</span>
+            </HeadContent>
+            <GridColumns>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.EmpNum) HeaderText="รหัสพนักงาน" IsPrimaryKey="true" Type="ColumnType.String" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.EmpName) HeaderText="ชื่อพนักงาน" Type="ColumnType.String" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.HireDate) HeaderText="วันที่เริ่มงาน" Type="ColumnType.DateOnly" Format="dd/MM/yyyy" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.Salary) HeaderText="เงินเดือน" Type="ColumnType.Double" Format="N2" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.PositionNo) HeaderText="ตำแหน่ง" Type="ColumnType.String" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.DepNo) HeaderText="รหัสแผนก" Type="ColumnType.String" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+                <GridColumn Field=@nameof(EmployeeGetResponseModel.HeadNo) HeaderText="รหัสหัวหน้าพนักงาน" Type="ColumnType.String" TextAlign="TextAlign.Center" AutoFit="true"></GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+@code
+{
+    public string? FirstNameRecord { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ViewModel!.GetEmployeeData();
+
+        if (ViewModel!.EmployeeData.Count > 0)
+        {
+            FirstNameRecord = ViewModel!.EmployeeData[0].EmpName;
+        }
+    }
+}

@@ -1,0 +1,30 @@
+﻿@using Blazing.Mvvm.Components
+@using FrontEnd.ViewModel.Component
+
+@inherits MvvmComponentBase<PopupComponentViewModel>
+@attribute [StreamRendering(true)]
+
+<SfDialog ID="dialog" IsModal="true" Width="300px" @bind-Visible="@ViewModel!.IsOpen">
+    <DialogTemplates>
+        <Header>
+            <div id="heading">SoftDebut QUIZ</div>
+        </Header>
+        <Content>
+            <span>@Message</span>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="ปิด" IsPrimary="true" OnClick="ViewModel.OnSubmit" />
+    </DialogButtons>
+</SfDialog>
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public string? Message { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnWindowVisibleChanged { get; set; }
+}
